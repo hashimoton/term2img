@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Term2img</title>
+<style>
+
+.input, .output {
+  min-height: 80px;
+  min-width: 80px;
+  border: solid 1px #eeeeee;
+
+}
+.text {
+  min-height: 80px;
+  min-width: 320px;
+  font-family: Consolas, "Courier New", monospace;
+}
+
+
+.action {
+  display: block;
+  margin:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Text</h2>
+<div class="input">
+  <textarea id="text" class="text">$ echo "Hello"
+Hello
+$</textarea>
+</div>
+
+<div class="action">
+  <button class="action" onclick="render()">Render</button>
+</div>
+
+<h2>Image</h2>
+<div class="output">
+  <canvas id="canvas"></canvas>
+</div>
+
+<div class="action">
+  <a id="download" href="#">Download</a>
+</div>
+
+
+<script>
+
+function render() {
+  const max_col = 160;
+  const font_height = 16;
+  const font_width = 8;
+  const margin_height = 2;
+  const line_height = font_height + margin_height;
+  const margin_width = 5;
+  
+  const text = document.getElementById('text').value;
+
+  const lines = text.split("\n");
+  let rows = [];
+  for(let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    rows.push(line.match(new RegExp('.{1,' + max_col + '}', 'g')));
+  }
+  
+  const fixed_rows = rows.flat();
+  
+  const canvas = document.getElementById('canvas');
+  canvas.height = line_height * fixed_rows.length + margin_height * 2;
+  canvas.width = font_width * max_col + margin_width * 2;
+  
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#333333';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.font = font_height + 'px monospace';
+  ctx.fillStyle = '#cccccc';
+
+  for(let i = 0; i < fixed_rows.length; i++) {
+    const row = fixed_rows[i];
+    
+    if(row) {
+      ctx.fillText(row, margin_width, line_height * (i+1));
+    }
+  }
+
+  const base64 = canvas.toDataURL('image/jpeg');
+  const download = document.getElementById('download');
+  download.href = base64;
+  download.download = "console_" + max_col + ".jpg";
+};
+
+</script>
+
+
+</body>
+</html>
+
